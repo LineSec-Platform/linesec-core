@@ -13,3 +13,6 @@ class Finding(Base):
     file_path = Column(String)
     line_number = Column(Integer)
     remediation_status = Column(String, default="OPEN")
+    root_cause = Column(Text, nullable=True)
+    remediation_plan = Column(Text, nullable=True)
+

@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -14,6 +15,15 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="LineSec Core API", lifespan=lifespan)
+
+# Add CORS Middleware to allow all origins, methods, and headers
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Dependency for database session
 def get_db():
@@ -42,3 +52,7 @@ def ingest_findings(findings: List[schemas.FindingCreate], db: Session = Depends
         db.refresh(db_finding)
         
     return db_findings
+
+@app.get("/api/findings", response_model=List[schemas.FindingResponse])
+def get_findings(db: Session = Depends(get_db)):
+    return db.query(models.Finding).all()
